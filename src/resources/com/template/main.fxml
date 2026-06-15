@@ -85,7 +85,7 @@
 
                 <VBox spacing="8.0">
                     <children>
-                        <Label text="Cidade Sede" textFill="#9ca3af">
+                        <Label text="Cidade" textFill="#9ca3af">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>

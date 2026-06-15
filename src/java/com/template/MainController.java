@@ -11,6 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.util.List;
 
 public class MainController {
+
     @FXML private TextField txtSearch;
     @FXML private TextField txtNome;
     @FXML private TextField txtCidade;
@@ -31,11 +32,13 @@ public class MainController {
 
     @FXML
     private void initialize() {
+        // Vincula as colunas da tabela a classe TeamDTO
         colNome.setCellValueFactory(new PropertyValueFactory<>("name"));
         colCidade.setCellValueFactory(new PropertyValueFactory<>("city"));
         colEstadio.setCellValueFactory(new PropertyValueFactory<>("stadium"));
         colLiga.setCellValueFactory(new PropertyValueFactory<>("league"));
 
+        // Busca os dados do banco para preencher a tabela
         loadTableData();
 
         btnSave.setOnAction(event -> saveTeam());
@@ -43,6 +46,7 @@ public class MainController {
         btnUpdate.setOnAction(event -> updateTeam());
         btnDelete.setOnAction(event -> deleteTeam());
 
+        // Preenche os campos quando uma linha é clicada
         tableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 txtNome.setText(newValue.getName());
@@ -52,6 +56,7 @@ public class MainController {
             }
         });
 
+        // Aciona o filtro da tabela em tempo real quando o usuário digita
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> filterTable(newValue));
     }
 
@@ -131,6 +136,7 @@ public class MainController {
         }
     }
 
+    // Limpa todos os inputs da tela e remover seleções ativas
     private void clearFields() {
         txtNome.clear();
         txtCidade.clear();
@@ -140,6 +146,7 @@ public class MainController {
         tableView.getSelectionModel().clearSelection();
     }
 
+    // Realiza um filtro em memória na lista de times
     private void filterTable(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             tableView.setItems(observableTeams);
@@ -149,6 +156,7 @@ public class MainController {
         String lowerCaseFilter = keyword.toLowerCase();
         ObservableList<TeamDTO> filteredData = FXCollections.observableArrayList();
 
+        // Procura correspondências de nome, cidade ou liga
         for (TeamDTO team : observableTeams) {
             if (team.getName().toLowerCase().contains(lowerCaseFilter) ||
                 team.getCity().toLowerCase().contains(lowerCaseFilter) ||
