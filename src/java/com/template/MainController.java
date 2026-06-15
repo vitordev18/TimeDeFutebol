@@ -11,12 +11,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.util.List;
 
 public class MainController {
-
     @FXML private TextField txtSearch;
     @FXML private TextField txtNome;
     @FXML private TextField txtCidade;
     @FXML private TextField txtEstadio;
-    @FXML private TextField txtLiga;
+    @FXML private ComboBox<String> cboLiga;
     @FXML private Button btnSave;
     @FXML private Button btnClear;
     @FXML private Button btnUpdate;
@@ -26,38 +25,57 @@ public class MainController {
     @FXML private TableColumn<TeamDTO, String> colCidade;
     @FXML private TableColumn<TeamDTO, String> colEstadio;
     @FXML private TableColumn<TeamDTO, String> colLiga;
+    @FXML private Label lblStatus;
 
     private TeamDAO teamDAO = new TeamDAO();
     private ObservableList<TeamDTO> observableTeams;
 
     @FXML
     private void initialize() {
-        // Vincula as colunas da tabela a classe TeamDTO
         colNome.setCellValueFactory(new PropertyValueFactory<>("name"));
         colCidade.setCellValueFactory(new PropertyValueFactory<>("city"));
         colEstadio.setCellValueFactory(new PropertyValueFactory<>("stadium"));
         colLiga.setCellValueFactory(new PropertyValueFactory<>("league"));
 
-        // Busca os dados do banco para preencher a tabela
+        cboLiga.setItems(FXCollections.observableArrayList(
+            "Brasileirão Série A", "Brasileirão Série B", "Premier League", "La Liga", "Outra"
+        ));
+
+        txtNome.setPromptText("Ex: CR Flamengo");
+        txtCidade.setPromptText("Ex: Rio de Janeiro");
+        txtEstadio.setPromptText("Ex: Maracanã");
+        cboLiga.setPromptText("Selecione a Liga");
+
         loadTableData();
+        configurarBotoesIniciais();
 
         btnSave.setOnAction(event -> saveTeam());
         btnClear.setOnAction(event -> clearFields());
         btnUpdate.setOnAction(event -> updateTeam());
         btnDelete.setOnAction(event -> deleteTeam());
 
-        // Preenche os campos quando uma linha é clicada
         tableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 txtNome.setText(newValue.getName());
                 txtCidade.setText(newValue.getCity());
                 txtEstadio.setText(newValue.getStadium());
-                txtLiga.setText(newValue.getLeague());
+                cboLiga.setValue(newValue.getLeague());
+
+                btnUpdate.setDisable(false);
+                btnDelete.setDisable(false);
+                btnSave.setDisable(true);
             }
         });
 
-        // Aciona o filtro da tabela em tempo real quando o usuário digita
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> filterTable(newValue));
+
+        txtNome.requestFocus();
+    }
+
+    private void configurarBotoesIniciais() {
+        btnUpdate.setDisable(true);
+        btnDelete.setDisable(true);
+        btnSave.setDisable(false);
     }
 
     private void loadTableData() {
@@ -66,13 +84,13 @@ public class MainController {
             observableTeams = FXCollections.observableArrayList(teams);
             tableView.setItems(observableTeams);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Erro", "Erro ao carregar dados do banco: " + e.getMessage());
+            showStatus("Erro ao carregar dados do banco: " + e.getMessage(), true);
         }
     }
 
     private void saveTeam() {
         if (txtNome.getText().isEmpty() || txtCidade.getText().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Atenção", "Preencha pelo menos o Nome e a Cidade da equipe.");
+            showStatus("Atenção: Preencha os campos obrigatórios (Nome e Cidade)!", true);
             return;
         }
 
@@ -81,72 +99,67 @@ public class MainController {
             team.setName(txtNome.getText());
             team.setCity(txtCidade.getText());
             team.setStadium(txtEstadio.getText());
-            team.setLeague(txtLiga.getText());
+            team.setLeague(cboLiga.getValue() != null ? cboLiga.getValue() : "");
 
             teamDAO.create(team);
 
             clearFields();
             loadTableData();
-            showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Equipe cadastrada com sucesso!");
+            showStatus("Equipe cadastrada com sucesso!", false);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Erro", "Falha ao salvar equipe: " + e.getMessage());
+            showStatus("Falha ao salvar equipe: " + e.getMessage(), true);
         }
     }
 
     private void updateTeam() {
         TeamDTO selectedTeam = tableView.getSelectionModel().getSelectedItem();
 
-        if (selectedTeam == null) {
-            showAlert(Alert.AlertType.WARNING, "Atenção", "Selecione uma equipe na tabela para editar.");
-            return;
-        }
+        if (selectedTeam == null) return;
 
         try {
             selectedTeam.setName(txtNome.getText());
             selectedTeam.setCity(txtCidade.getText());
             selectedTeam.setStadium(txtEstadio.getText());
-            selectedTeam.setLeague(txtLiga.getText());
+            selectedTeam.setLeague(cboLiga.getValue() != null ? cboLiga.getValue() : "");
 
             teamDAO.update(selectedTeam);
 
             clearFields();
             loadTableData();
-            showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Equipe atualizada com sucesso!");
+            showStatus("Equipe atualizada com sucesso!", false);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Erro", "Falha ao atualizar equipe: " + e.getMessage());
+            showStatus("Falha ao atualizar equipe: " + e.getMessage(), true);
         }
     }
 
     private void deleteTeam() {
         TeamDTO selectedTeam = tableView.getSelectionModel().getSelectedItem();
 
-        if (selectedTeam == null) {
-            showAlert(Alert.AlertType.WARNING, "Atenção", "Selecione uma equipe na tabela para excluir.");
-            return;
-        }
+        if (selectedTeam == null) return;
 
         try {
             teamDAO.delete(selectedTeam.getId());
 
             clearFields();
             loadTableData();
-            showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Equipe excluída com sucesso!");
+            showStatus("Equipe excluída com sucesso!", false);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Erro", "Falha ao excluir equipe: " + e.getMessage());
+            showStatus("Falha ao excluir equipe: " + e.getMessage(), true);
         }
     }
 
-    // Limpa todos os inputs da tela e remover seleções ativas
     private void clearFields() {
         txtNome.clear();
         txtCidade.clear();
         txtEstadio.clear();
-        txtLiga.clear();
+        cboLiga.setValue(null);
         txtSearch.clear();
         tableView.getSelectionModel().clearSelection();
+
+        configurarBotoesIniciais();
+        txtNome.requestFocus();
     }
 
-    // Realiza um filtro em memória na lista de times
     private void filterTable(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             tableView.setItems(observableTeams);
@@ -156,22 +169,22 @@ public class MainController {
         String lowerCaseFilter = keyword.toLowerCase();
         ObservableList<TeamDTO> filteredData = FXCollections.observableArrayList();
 
-        // Procura correspondências de nome, cidade ou liga
         for (TeamDTO team : observableTeams) {
             if (team.getName().toLowerCase().contains(lowerCaseFilter) ||
                 team.getCity().toLowerCase().contains(lowerCaseFilter) ||
-                team.getLeague().toLowerCase().contains(lowerCaseFilter)) {
+                (team.getLeague() != null && team.getLeague().toLowerCase().contains(lowerCaseFilter))) {
                 filteredData.add(team);
             }
         }
         tableView.setItems(filteredData);
     }
 
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private void showStatus(String message, boolean isError) {
+        lblStatus.setText(message);
+        if (isError) {
+            lblStatus.setStyle("-fx-text-fill: #d9534f; -fx-font-weight: bold;");
+        } else {
+            lblStatus.setStyle("-fx-text-fill: #2b8a3e; -fx-font-weight: bold;");
+        }
     }
 }

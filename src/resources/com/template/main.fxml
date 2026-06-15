@@ -3,11 +3,13 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -20,6 +22,7 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
+                        <ImageView fx:id="imgLogo" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
                         <Label text="⚽" textFill="#10b981">
                             <font>
                                 <Font size="28.0" />
@@ -74,7 +77,7 @@
 
                 <VBox spacing="8.0">
                     <children>
-                        <Label text="Nome da Equipe" textFill="#9ca3af">
+                        <Label text="Nome da Equipe *" textFill="#9ca3af">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
@@ -85,7 +88,7 @@
 
                 <VBox spacing="8.0">
                     <children>
-                        <Label text="Cidade" textFill="#9ca3af">
+                        <Label text="Cidade *" textFill="#9ca3af">
                             <font>
                                 <Font name="System Bold" size="12.0" />
                             </font>
@@ -112,7 +115,7 @@
                                 <Font name="System Bold" size="12.0" />
                             </font>
                         </Label>
-                        <TextField fx:id="txtLiga" prefHeight="40.0" promptText="Ex: Brasileirão Série A" style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-border-color: #334155; -fx-border-radius: 8; -fx-background-radius: 8;" />
+                        <ComboBox fx:id="cboLiga" maxWidth="1.7976931348623157E308" prefHeight="40.0" promptText="Selecione a Liga" style="-fx-background-color: #0f172a; -fx-border-color: #334155; -fx-border-radius: 8; -fx-background-radius: 8; -fx-base: #0f172a;" />
                     </children>
                 </VBox>
 
@@ -150,7 +153,6 @@
         </VBox>
     </left>
 
-    <!-- ÁREA CENTRAL (TABELA CARD) -->
     <center>
         <VBox prefHeight="200.0" prefWidth="100.0" spacing="15.0" style="-fx-background-color: #1e293b; -fx-background-radius: 16; -fx-border-color: #334155; -fx-border-radius: 16;" BorderPane.alignment="CENTER">
             <children>
@@ -160,7 +162,6 @@
                     </font>
                 </Label>
 
-                <!-- Truque com -fx-base para forçar um tema dark na tabela nativa -->
                 <TableView fx:id="tableView" prefHeight="450.0" prefWidth="560.0" style="-fx-base: #1e293b; -fx-control-inner-background: #0f172a; -fx-background-color: transparent; -fx-table-cell-border-color: transparent; -fx-table-header-border-color: #334155; -fx-padding: 0;" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colNome" prefWidth="160.0" style="-fx-font-weight: bold; -fx-alignment: CENTER-LEFT;" text="Equipe" />
@@ -173,24 +174,34 @@
                     </columnResizePolicy>
                 </TableView>
 
-                <HBox alignment="CENTER_RIGHT" prefHeight="50.0" spacing="12.0">
+                <HBox alignment="CENTER_LEFT" prefHeight="50.0" spacing="12.0">
                     <children>
-                        <Button fx:id="btnUpdate" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-weight: bold;" text="✏️ Editar">
-                            <padding>
-                                <Insets left="20.0" right="20.0" />
-                            </padding>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
-                        <Button fx:id="btnDelete" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-weight: bold;" text="🗑️ Excluir">
-                            <padding>
-                                <Insets left="20.0" right="20.0" />
-                            </padding>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Button>
+                        <Label fx:id="lblStatus" text="" textFill="#10b981">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+
+                        <HBox alignment="CENTER_RIGHT" spacing="12.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Button fx:id="btnUpdate" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-weight: bold;" text="✏️ Editar">
+                                    <padding>
+                                        <Insets left="20.0" right="20.0" />
+                                    </padding>
+                                    <cursor>
+                                        <Cursor fx:constant="HAND" />
+                                    </cursor>
+                                </Button>
+                                <Button fx:id="btnDelete" mnemonicParsing="false" prefHeight="40.0" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-weight: bold;" text="🗑️ Excluir">
+                                    <padding>
+                                        <Insets left="20.0" right="20.0" />
+                                    </padding>
+                                    <cursor>
+                                        <Cursor fx:constant="HAND" />
+                                    </cursor>
+                                </Button>
+                            </children>
+                        </HBox>
                     </children>
                     <VBox.margin>
                         <Insets top="10.0" />
